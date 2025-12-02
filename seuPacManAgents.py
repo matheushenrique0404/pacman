@@ -32,15 +32,15 @@ class MinimaxAgent(MultiAgentSearchAgent):
             if state.isWin() or state.isLose() or depth >= self.depth:
                 return better(state), None
 
-            # calcula próximo agente
+            # calcula próximo agente (Assim que o indície passa do último agente, volta para o Pacman)
             next_agent = agentIndex + 1
             if next_agent >=  state.getNumAgents():
                 next_agent = 0
-            # calcula próxima profundidade (apenas e agentIndex == self.index a profundidade aumenta)
+            # calcula próxima profundidade = decisões estratégicas (apenas e agentIndex == self.index a profundidade aumenta)
             if agentIndex == self.index: 
                 depth = depth + 1 
 
-            score_actions = []
+            score_actions = [] # coracão do minimax, gera o estado sucessor e faz avaliação recursiva
             # para cada ação possível em state.getLegalActions(agentIndex)
             for acao in state.getLegalActions(agentIndex):
                 # calcula o próximo estado com state.generateSuccessor(agentIndex, action)
@@ -49,22 +49,23 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 score, _ = minimax(next_agent, depth, sucessor)
                 score_actions.append((score, acao))
 
-            # se for um passo de maximização e o score for maior que o anterior, selecione ele
+            # se for um passo de maximização (Pacman) e o score for maior que o anterior, selecione ele
             if agentIndex == self.index:
                 return max(score_actions, key=lambda x: x[0])
-            # se for um passo de minimização e o score for menor que o anterior, selecione ele
+            # se for um passo de minimização (Fantasma) e o score for menor que o anterior, selecione ele
             else:
                 return min(score_actions,  key=lambda x: x[0])
-
+            # parte do código feito para manter um comportamente adversarial clássico
         return minimax()[1]
 
 
-def betterEvaluationFunction(currentGameState: GameState):
+def betterEvaluationFunction(currentGameState: GameState): # Medir o quão bom é o estado atual
     pos = currentGameState.getPacmanPosition()
     food = currentGameState.getFood().asList()
     ghostStates = currentGameState.getGhostStates()
 
     # Calcula a distância de Manhattan para a comida mais próxima
+    # Quanto menor a distância, maior a recompensa
     foodDistances = [manhattanDistance(pos, f) for f in food]
     if len(foodDistances) > 0:
         minFoodDistance = min(foodDistances)
